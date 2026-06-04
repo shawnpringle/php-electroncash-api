@@ -76,13 +76,12 @@ $decoded = json_decode($response, true);
 ```
 
 
-XXX - Fix all of this slop/
 ### notify(address, url)
 - Description: Requests that the daemon will send a POST message to the supplied URL whenever the balance for address changes.  
 - Parameters:
     - address: Bitcoincash cash address
     - url    : Full URL of where to send the POST request.     - 
-- Returns: Do not know, and do not care.
+- Returns: to do
 - Example:
 ```
 $ec = new ElectronCashRPC();
@@ -91,8 +90,7 @@ $ec->notify('qbchaddress...', 'http://127.0.0.1/localonly/pay_listener.php');
 
 Notes
 - When the address balance changes the script will be called and it will be able to read standard input and thatwill look like `{"address": "qbchaddress...", "status": "8ea11ylonghexnumber..."}`
-
-One should prevent the whole internet from calling this script that will handle notifications.  
+- One should prevent the whole internet from calling this script that will handle notifications.  
 
   
 
