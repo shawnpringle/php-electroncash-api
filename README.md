@@ -10,7 +10,9 @@ PHP class for interacting with the Electron-Cash RPC
  ```
     $ec = new ElectronCashRPC();
     $balance = $ec->getbalance();
-    echo "Balance: " . $balance;
+    $balance = $ec->getaddressbalance('qbchaddress');
+    $ec->createnewaddress();
+    $ec->notify('bchaddress', 'https://example.com/handlenotificatoin.php');
 ```
 
 ## Methods
@@ -92,5 +94,34 @@ Notes
 - When the address balance changes the script will be called and it will be able to read standard input and thatwill look like `{"address": "qbchaddress...", "status": "8ea11ylonghexnumber..."}`
 - One should prevent the whole internet from calling this script that will handle notifications.  
 
-  
 
+### getbalance
+- Description: Queries the wallet for its confirmed and unconfirmed balances.
+- Returns: A JSON string which when decoded will be an associative array with keys 'confirmed', and 'unconfirmed' (numeric values in Bitcoincash ).
+- Example:
+```
+require_once "../ec.php";
+
+$ec = new ElectronCashRPC();
+$response = $ec->getbalance();
+$decoded = json_decode($response, true);
+if ($decoded == null) {
+    echo "getbalance: Did not return a JSON object: $response" ;
+    return;
+} else if ( $decoded['error'] ) {
+    echo "getbalance: Error returned from daemon: " . $decoded['error'] ;
+    return;
+} else if ( !isset($decoded['result']) ) {
+    echo "getbalance: No result field in response: $response" ;
+    return;
+}
+$result = $decoded['result'];
+if (isset($result['confirmed'])) {
+    $confirmed = $result['confirmed'];
+    echo 'confirmed is ' . $confirmed;
+}
+if (isset($result['unconfirmed'])) {
+    $unconfirmed = $result['unconfirmed'];
+    echo 'unconfirmed is ' . $unconfirmed;
+}
+```
