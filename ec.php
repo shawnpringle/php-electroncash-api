@@ -21,11 +21,11 @@ final class ElectronCashRPC
     /** The cURL handle for the RPC connection. */
     public $ch;   
     private $message_id;
+    private $chowned;
 
-    public function __construct() {
+    public function __construct($ch = null, $configFile = '/var/www/etc/electron-cash/config') {
         $home = getenv('HOME') ?: (isset($_SERVER['HOME']) ? $_SERVER['HOME'] : null);
 
-        $configFile = '/var/www/etc/electron-cash/config';
         if (!is_readable($configFile)) {
             throw new Exception("Cannot read Electron Cash config: $configFile (home is $home)");
         }    
@@ -49,7 +49,13 @@ final class ElectronCashRPC
         ];
 
         $url = "http://localhost:$rpc_port";
-        $this->ch = curl_init($url);
+        if ($ch == null) {
+            $this->ch = curl_init($url);
+            $this->chowned = true;
+        } else {
+            $this->ch = $ch;
+            $this->chowned = false;
+        }
 
         curl_setopt($this->ch, CURLOPT_POST, true);
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $headers);
@@ -57,10 +63,11 @@ final class ElectronCashRPC
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, true);
 
         $this->message_id = random_int(0, 400000);
+        return $this;
     }
 
     function __destruct() {
-        if ($this->ch) {
+        if ($this->ch && $this->chowned) {
             curl_close($this->ch);
         }
     }

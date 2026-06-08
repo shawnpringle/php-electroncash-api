@@ -125,3 +125,19 @@ if (isset($result['unconfirmed'])) {
     echo 'unconfirmed is ' . $unconfirmed;
 }
 ```
+# Testing Setup
+
+For proper testing, you need to have both electron cash and a satoshi style bitcoincash node software installed.  
+
+Run the following in the tests directory once.  
+
+```
+electron-cash --regtest
+```
+
+
+Once that is done, you can use the unit tests:
+```
+phpunit ECTestCase.php
+```
+
