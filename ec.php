@@ -84,18 +84,28 @@ final class ElectronCashRPC
     }
 
     /**
-     * Get the balance of a specific BCH address.  
+     * Get the balance of a specific BCH address.
+     *
+     * First parameter is the bitcoincash address
+     * The second parameter is optional, which defaults may change in the future.  
+     * They can be one of tokens_only, include_tokens, or exclude_tokens. 
+     * 
+     * Return is an 'array' of the form { 'confirmed': number } or 
+     * { 'confirmed': number, 'unconfirmed': number }.  It may be the second
+     * form even with the unconfirmed part being equal to zero.
+     * 
      */
-    function getaddressbalance($bch_address, $include_tokens=False, $tokens_only=False) {
+    function getaddressbalance($bch_address, $token_filter=false) {
         $this->message_id++;
+        $params = [ $bch_address ];
+        if ($token_filter) {
+          // should be one of tokens_only, include_tokens, or exclude_tokens
+          $params.push($token_filter);
+        }
         $data = [
             'id' => $this->message_id,
             'method' => 'getaddressbalance',
-            'params' => [
-                $bch_address,
-                $include_tokens,
-                $tokens_only
-            ]
+            'params' => $params
         ];
         curl_setopt($this->ch, CURLOPT_POSTFIELDS, json_encode($data));
         return curl_exec($this->ch);
@@ -118,11 +128,21 @@ final class ElectronCashRPC
 
     /**
      * Add a new payment request.
+     *
+     * The first parameter is the amount in Bitcoincash.
+     * The second parameter is the memo
+     * Third, the timeout in seconds
+     * Fourth, can be any non-zero to indicate that it should create a new address if we don't have any unused addresses left.
+     * Fifth, is the payment_url that the wallet will put an id on the end of like 
+     * 'https://example.com/invoice' (note no trailing slash) and the URL returned will be 'https://example.com/invoice/' + some id.
+     * Sixth, the index_url base like 'https://example.com/index' (not no trailing slash) and returned will have a slash and then some id.
+     * Seventh is the token_request boolean; either 0 or 1.
+     * Eigth is the catogory_id.  I think this maybe the token hash.
      */
-    function addrequest($price, $message, $timeout=0, $force=0, $payment_url=0, $index_url=0, $token_request=0, $category_id=0){
+    function addrequest($amount, $memo='', $timeout=0, $force=0, $payment_url=0, $index_url=0, $token_request=0, $category_id=0){
         $params = [
-            $price,
-            $message,
+            $amount,
+            $memo,
             $timeout,
             $force,
             $payment_url,
